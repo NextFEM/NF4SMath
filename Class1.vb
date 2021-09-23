@@ -34,14 +34,10 @@ Public Class Class1
             If disposing Then
                 nf = Nothing
             End If
-
-            ' TODO: liberare risorse non gestite (oggetti non gestiti) ed eseguire l'override del finalizzatore
-            ' TODO: impostare campi di grandi dimensioni su Null
             disposedValue = True
         End If
     End Sub
 
-    ' TODO: eseguire l'override del finalizzatore solo se 'Dispose(disposing As Boolean)' contiene codice per liberare risorse non gestite
     Protected Overrides Sub Finalize()
         ' Non modificare questo codice. Inserire il codice di pulizia nel metodo 'Dispose(disposing As Boolean)'
         Dispose(disposing:=False)
@@ -134,6 +130,6 @@ Public Class Class1
         ' load API
         Dim oAssembly As System.Reflection.Assembly = System.Reflection.Assembly.LoadFrom(iPath & "\NextFEMapi.dll")
         Dim oType As Type = oAssembly.GetType("NextFEMapi.API")
-        Return Activator.CreateInstance(oType) ' lo crea vuoto
+        Return Activator.CreateInstance(oType)
     End Function
 End Class
