@@ -11,7 +11,7 @@ Public Class Class1
     Dim leng As String = "" : Dim force As String = ""
 
     Public Sub Initialize() Implements IPlugin.Initialize
-        asseblyInfos = New AssemblyInfo() {New AssemblyInfo("SMath Studio", New Version(0, 98), New Guid("a37cba83-b69c-4c71-9992-55ff666763bd"))}
+        asseblyInfos = New AssemblyInfo() {New AssemblyInfo("SMath Studio", New Version(0, 99), New Guid("a37cba83-b69c-4c71-9992-55ff666763bd"))}
         nf = loadNFapi()
     End Sub
 
@@ -51,6 +51,7 @@ Public Class Class1
     End Sub
 
     Public Function TryEvaluateExpression(value As Entry, context As Store, ByRef result As Entry) As Boolean Implements IPluginLowLevelEvaluationFast.TryEvaluateExpression
+        If nf Is Nothing Then Return False ' API not loaded
         ' version - should be a constant
         If value.Type = TermType.Function And value.Text = "nfver" Then
             result = New Entry(CDbl(nf.getVersion()))
