@@ -9,7 +9,7 @@ Public Class Class1
     Private disposedValue As Boolean
     Dim nf As Object
     Dim leng As String = "" : Dim force As String = ""
-
+    Dim msg As Boolean = False
     Public Sub Initialize() Implements IPlugin.Initialize
         asseblyInfos = New AssemblyInfo() {New AssemblyInfo("SMath Studio", New Version(0, 99), New Guid("a37cba83-b69c-4c71-9992-55ff666763bd"))}
         nf = loadNFapi()
@@ -31,9 +31,7 @@ Public Class Class1
 
     Protected Overridable Sub Dispose(disposing As Boolean)
         If Not disposedValue Then
-            If disposing Then
-                nf = Nothing
-            End If
+            If disposing Then nf = Nothing
             disposedValue = True
         End If
     End Sub
@@ -51,7 +49,11 @@ Public Class Class1
     End Sub
 
     Public Function TryEvaluateExpression(value As Entry, context As Store, ByRef result As Entry) As Boolean Implements IPluginLowLevelEvaluationFast.TryEvaluateExpression
-        If nf Is Nothing Then Return False ' API not loaded
+        If nf Is Nothing Then
+            If Not msg Then MsgBox("NextFEM Designer is not installed, exiting. Get it for free at www.nextfem.it")
+            msg = True
+            Return False ' API not loaded
+        End If
         ' version - should be a constant
         If value.Type = TermType.Function And value.Text = "nfver" Then
             result = New Entry(CDbl(nf.getVersion()))
@@ -118,12 +120,11 @@ Public Class Class1
         End Try
     End Function
 
-    Shared Function loadNFapi() As Object
+    Function loadNFapi() As Object
         loadNFapi = Nothing
         ' registry entry for installation path
-        Dim iPath As String = Registry.GetValue("HKEY_LOCAL_MACHINE\SOFTWARE\Classes\NextFEM Designer\shell\open\command", "", Nothing)
+        Dim iPath As Object = Registry.GetValue("HKEY_LOCAL_MACHINE\SOFTWARE\Classes\NextFEM Designer\shell\open\command", "", Nothing)
         If iPath Is Nothing Then
-            MsgBox("NextFEM Designer is not installed, exiting")
             Exit Function
         Else
             iPath = IO.Path.GetDirectoryName(iPath.Replace(Chr(34), "").Replace("%1", "").Trim)
