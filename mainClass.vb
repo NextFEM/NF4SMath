@@ -28,6 +28,10 @@ Public Class mainClass
                                New ArgumentInfo(ArgumentSections.String), New ArgumentInfo(ArgumentSections.String), New ArgumentInfo(ArgumentSections.RealNumber), New ArgumentInfo(ArgumentSections.RealNumber)))
         funcs.Add(New TermInfo("nfPeriod", TermType.Function, "(loadcase,num) - Get selected modal period from the selected modal analysis loadcase", FunctionSections.Unknown, True,
                                New ArgumentInfo(ArgumentSections.String), New ArgumentInfo(ArgumentSections.RealNumber)))
+        funcs.Add(New TermInfo("nfPartMassesRatios", TermType.Function, "(loadcase,num) - Get participating masses ratios from modal or resp. spectrum analysis", FunctionSections.Unknown, True,
+                               New ArgumentInfo(ArgumentSections.String), New ArgumentInfo(ArgumentSections.RealNumber)))
+        funcs.Add(New TermInfo("nfPartFactors", TermType.Function, "(loadcase,num) - Get participation factors from modal or resp. spectrum analysis", FunctionSections.Unknown, True,
+                               New ArgumentInfo(ArgumentSections.String), New ArgumentInfo(ArgumentSections.RealNumber)))
 
 #End Region
 
@@ -121,6 +125,34 @@ Public Class mainClass
             Dim val As Double = nf.getModalPeriod(num, lc)
             Dim out As New TDouble(val * New TDouble("'s")) ' s is hardcoded, not other time units possible
             result = Entry.Create(out.ToTerms)
+            Return True
+        End If
+        ' participating masses ratios
+        If value.Type = TermType.Function And value.ArgsCount >= 2 And value.Text = "nfPartMassesRatios" Then
+            Dim lc As String = getStr(value, context, 0)
+            Dim num As Integer = CInt(getStr(value, context, 1))
+            Dim val() As Double = nf.getParticipatingMassesRatios(num, lc)
+            If val Is Nothing Then val = {0, 0, 0, 0, 0, 0}
+            Dim m(5, 0) As TNumber
+            For i = 0 To 5
+                m(i, 0) = New TNumber(val(i))
+            Next
+            Dim mout As New TMatrix(m)
+            result = Entry.Create(mout.ToTerms)
+            Return True
+        End If
+        ' participation factors
+        If value.Type = TermType.Function And value.ArgsCount >= 2 And value.Text = "nfPartFactors" Then
+            Dim lc As String = getStr(value, context, 0)
+            Dim num As Integer = CInt(getStr(value, context, 1))
+            Dim val() As Double = nf.getParticipationFactors(num, lc)
+            If val Is Nothing Then val = {0, 0, 0, 0, 0, 0}
+            Dim m(5, 0) As TNumber
+            For i = 0 To 5
+                m(i, 0) = New TNumber(val(i))
+            Next
+            Dim mout As New TMatrix(m)
+            result = Entry.Create(mout.ToTerms)
             Return True
         End If
 #End Region
