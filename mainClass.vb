@@ -35,6 +35,16 @@ Public Class mainClass
 
 #End Region
 
+#Region "model data"
+        funcs.Add(New TermInfo("nfSectProps", TermType.Function, "(sectionID) - Get section geometric properties: area and inertias", FunctionSections.Unknown, True,
+                              New ArgumentInfo(ArgumentSections.RealNumber)))
+        funcs.Add(New TermInfo("nfBeamL", TermType.Function, "(beam) - Get length of a beam", FunctionSections.Unknown, True,
+                              New ArgumentInfo(ArgumentSections.String)))
+        funcs.Add(New TermInfo("nfBeamSection", TermType.Function, "(beam) - Get ID of associated beam section", FunctionSections.Unknown, True,
+                              New ArgumentInfo(ArgumentSections.String)))
+
+#End Region
+
         Return funcs.ToArray
     End Function
 
@@ -127,7 +137,7 @@ Public Class mainClass
             result = Entry.Create(out.ToTerms)
             Return True
         End If
-        ' participating masses ratios
+        ' participating masses ratios: https://www.nextfem.it/api/html/M_NextFEMapi_API_getParticipatingMassesRatios.htm
         If value.Type = TermType.Function And value.ArgsCount >= 2 And value.Text = "nfPartMassesRatios" Then
             Dim lc As String = getStr(value, context, 0)
             Dim num As Integer = CInt(getStr(value, context, 1))
@@ -141,7 +151,7 @@ Public Class mainClass
             result = Entry.Create(mout.ToTerms)
             Return True
         End If
-        ' participation factors
+        ' participation factors: https://www.nextfem.it/api/html/M_NextFEMapi_API_getParticipationFactors.htm
         If value.Type = TermType.Function And value.ArgsCount >= 2 And value.Text = "nfPartFactors" Then
             Dim lc As String = getStr(value, context, 0)
             Dim num As Integer = CInt(getStr(value, context, 1))
@@ -156,7 +166,39 @@ Public Class mainClass
             Return True
         End If
 #End Region
+#Region "model data"
+        ' section properties: https://www.nextfem.it/api/html/M_NextFEMapi_API_getSectionProperty.htm
+        If value.Type = TermType.Function And value.ArgsCount >= 1 And value.Text = "nfSectProps" Then
+            Dim num As String = getStr(value, context, 0) '  Area, Jxc, Jyc, Jxyc
+            Dim val() As Double = {nf.getSectionProperty(num, "Area"), nf.getSectionProperty(num, "Jxc"), nf.getSectionProperty(num, "Jyc"), nf.getSectionProperty(num, "Jxyc")}
+            If val Is Nothing Then val = {0, 0, 0, 0}
+            Dim m(3, 0) As TNumber
+            m(0, 0) = New TNumber(val(0) * New TDouble("'" & leng & "^2"))
+            For i = 1 To 3
+                m(i, 0) = New TNumber(val(i) * New TDouble("'" & leng & "^4"))
+            Next
+            Dim mout As New TMatrix(m)
+            result = Entry.Create(mout.ToTerms)
+            Return True
+        End If
+        ' beam length: https://www.nextfem.it/api/html/M_NextFEMapi_API_getModalPeriod.htm
+        If value.Type = TermType.Function And value.ArgsCount >= 1 And value.Text = "nfBeamL" Then
+            Dim num As String = getStr(value, context, 0)
+            Dim val As Double = nf.getElementProperty(num, "lun")
+            Dim out As New TDouble(val * New TDouble("'" & leng))
+            result = Entry.Create(out.ToTerms)
+            Return True
+        End If
+        ' beam section: https://www.nextfem.it/api/html/M_NextFEMapi_API_getModalPeriod.htm
+        If value.Type = TermType.Function And value.ArgsCount >= 1 And value.Text = "nfBeamSection" Then
+            Dim num As String = getStr(value, context, 0)
+            Dim val As Double = nf.getElementProperty(num, "sect")
+            Dim out As New TDouble(val)
+            result = Entry.Create(out.ToTerms)
+            Return True
+        End If
 
+#End Region
         Return False
     End Function
 
