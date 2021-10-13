@@ -173,9 +173,9 @@ Public Class mainClass
             Dim val() As Double = {nf.getSectionProperty(num, "Area"), nf.getSectionProperty(num, "Jxc"), nf.getSectionProperty(num, "Jyc"), nf.getSectionProperty(num, "Jxyc")}
             If val Is Nothing Then val = {0, 0, 0, 0}
             Dim m(3, 0) As TNumber
-            m(0, 0) = New TNumber(val(0) * New TDouble("'" & leng & "^2"))
+            m(0, 0) = New TNumber(val(0) * DirectCast(New TDouble("'" & leng).Pow(New TDouble(2)), TDouble))
             For i = 1 To 3
-                m(i, 0) = New TNumber(val(i) * New TDouble("'" & leng & "^4"))
+                m(i, 0) = New TNumber(val(i) * DirectCast(New TDouble("'" & leng).Pow(New TDouble(4)), TDouble))
             Next
             Dim mout As New TMatrix(m)
             result = Entry.Create(mout.ToTerms)
