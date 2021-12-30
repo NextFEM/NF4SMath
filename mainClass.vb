@@ -170,7 +170,7 @@ Public Class mainClass
         ' section properties: https://www.nextfem.it/api/html/M_NextFEMapi_API_getSectionProperty.htm
         If value.Type = TermType.Function And value.ArgsCount >= 1 And value.Text = "nfSectProps" Then
             Dim num As String = getStr(value, context, 0) '  Area, Jxc, Jyc, Jxyc
-            Dim val() As Double = {nf.getSectionProperty(num, "Area"), nf.getSectionProperty(num, "Jxc"), nf.getSectionProperty(num, "Jyc"), nf.getSectionProperty(num, "Jxyc")}
+            Dim val() As Double = {DblParse(nf.getSectionProperty(num, "Area")), DblParse(nf.getSectionProperty(num, "Jxc")), DblParse(nf.getSectionProperty(num, "Jyc")), DblParse(nf.getSectionProperty(num, "Jxyc"))}
             If val Is Nothing Then val = {0, 0, 0, 0}
             Dim m(3, 0) As TNumber
             m(0, 0) = New TNumber(val(0) * DirectCast(New TDouble("'" & leng).Pow(New TDouble(2)), TDouble))
@@ -184,7 +184,7 @@ Public Class mainClass
         ' beam length: https://www.nextfem.it/api/html/M_NextFEMapi_API_getModalPeriod.htm
         If value.Type = TermType.Function And value.ArgsCount >= 1 And value.Text = "nfBeamL" Then
             Dim num As String = getStr(value, context, 0)
-            Dim val As Double = nf.getElementProperty(num, "lun")
+            Dim val As Double = 0 : Double.TryParse(nf.getElementProperty(num, "lun"), val)
             Dim out As New TDouble(val * New TDouble("'" & leng))
             result = Entry.Create(out.ToTerms)
             Return True
@@ -192,7 +192,7 @@ Public Class mainClass
         ' beam section: https://www.nextfem.it/api/html/M_NextFEMapi_API_getModalPeriod.htm
         If value.Type = TermType.Function And value.ArgsCount >= 1 And value.Text = "nfBeamSection" Then
             Dim num As String = getStr(value, context, 0)
-            Dim val As Double = nf.getElementProperty(num, "sect")
+            Dim val As Double = 0 : Double.TryParse(nf.getElementProperty(num, "sect"), val)
             Dim out As New TDouble(val)
             result = Entry.Create(out.ToTerms)
             Return True
@@ -200,6 +200,12 @@ Public Class mainClass
 
 #End Region
         Return False
+    End Function
+
+    Function DblParse(str As String) As Double
+        DblParse = 0
+        Dim val As Double
+        If Double.TryParse(str, val) Then Return val
     End Function
 
     Function getStr(value As Entry, context As Store, index As Integer) As String
